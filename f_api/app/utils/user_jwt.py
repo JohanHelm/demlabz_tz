@@ -24,3 +24,5 @@ def get_user_from_token(token: str):
         raise HTTPException(status_code=401, detail="Token has expired", headers={"WWW-Authenticate": "Bearer"})
     except jwt.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token", headers={"WWW-Authenticate": "Bearer"})
+    finally:
+        return payload

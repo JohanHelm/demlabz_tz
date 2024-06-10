@@ -38,7 +38,8 @@ async def login_for_access_token(db_session: AsyncSession = Depends(get_async_se
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@user_router.get("/protected_resource")
-async def protected_resource(token: str = Depends(oauth2_scheme)):
-    get_user_from_token(token)
-    return {"message": "Access granted to protected resource"}
+@user_router.get("/profile")
+async def personal_data(token: str = Depends(oauth2_scheme)):
+    personal = get_user_from_token(token)
+    # return {"message": "Access granted to protected resource"}
+    return personal
