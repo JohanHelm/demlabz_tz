@@ -3,22 +3,19 @@ from abc import ABC, abstractmethod
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas.todo import ToDoCreate
-from app.db.models import ToDo
+from app.api.schemas.user import UserCreate
+from app.db.models import User
 
 
-class ToDoRepository(ABC):  # это абстрактный интерфейс нашего репозитория
-    @abstractmethod
-    async def get_todos(self) -> list[ToDo]:
-        pass
+class UserDAO(ABC):  # это абстрактный интерфейс нашего репозитория
 
     @abstractmethod
-    async def create_todo(self, todo: ToDoCreate) -> ToDo:
+    async def create_todo(self, user: UserCreate) -> User:
         pass
 
 
-class SqlAlchemyToDoRepository(ToDoRepository):  # это его конкретное исполнение для алхимии (можно сделать для peewee, pony и тд, легко поменять способ реализации)
-    def __init__(self, session: AsyncSession):  # при инициализации принимает асинхронную сессию
+class SqlAlchemyUserDAO(UserDAO):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
     # далее, по сути, код из эндпоинтов с предыдущего шага

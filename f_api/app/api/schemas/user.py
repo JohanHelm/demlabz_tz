@@ -10,10 +10,13 @@ class UserCreate(BaseModel):
     telegram_name: str
 
 
-class UserGetFromDB(UserCreate):
-    id: int
+class UserPersonalData(BaseModel):
+    nickname: str
+    email: str
+    telegram_name: str
     created_at: datetime.datetime
-
+    updated_at: datetime.datetime
 
 class UserDataUpdate(UserCreate):
+    id: int
     updated_at: datetime.datetime

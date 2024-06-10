@@ -2,10 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from app.db.db_settings import get_async_session
 from app.utils.user_jwt import create_access_token, get_user_from_token
-from app.utils.user_pass import authenticate_user
+from app.utils.user_pass import authenticate_user, get_user
+from app.api.schemas.user import UserPersonalData
+from app.db.models import User
 
 user_router = APIRouter(
     prefix="/user",
@@ -38,8 +41,21 @@ async def login_for_access_token(db_session: AsyncSession = Depends(get_async_se
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@user_router.get("/profile")
-async def personal_data(token: str = Depends(oauth2_scheme)):
+@user_router.get("/profile", response_model=UserPersonalData)
+async def personal_data(db_session: AsyncSession = Depends(get_async_session),
+                        token: str = Depends(oauth2_scheme),
+                        ):
     personal = get_user_from_token(token)
-    # return {"message": "Access granted to protected resource"}
-    return personal
+    username = personal.get("sub")
+    user = await get_user(username, db_session)
+    user_personal_data = UserPersonalData(
+        nickname=user.nickname,
+        email=user.email,
+        telegram_name=user.telegram_name,
+        created_at=user.created_at,
+        updated_at=user.updated_at
+    )
+
+    return user_personal_data
+
+

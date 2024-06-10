@@ -1,7 +1,7 @@
 
 CREATE TABLE IF NOT EXISTS auth_data (
     id bigserial PRIMARY KEY,
-    nickname TEXT NOT NULL,
+    nickname TEXT NOT NULL UNIQUE,
     pass_hash TEXT NOT NULL,
     email TEXT,
     telegram_name TEXT,

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    SALT: str
 
     # @property
     def async_database_url(self):
@@ -17,7 +18,11 @@ class Settings(BaseSettings):
 
     # @property
     def jwt_settigs_dict(self):
-        return {"secret_key": self.SECRET_KEY, "algoritm": self.ALGORITHM, "expire": self.ACCESS_TOKEN_EXPIRE_MINUTES}
+        return {"secret_key": self.SECRET_KEY,
+                "algoritm": self.ALGORITHM,
+                "expire": self.ACCESS_TOKEN_EXPIRE_MINUTES,
+                "salt": self.SALT
+                }
 
     class Config:
         env_file = ".env"
