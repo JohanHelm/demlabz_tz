@@ -2,13 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
+from app.api.schemas.user import UserPersonalData
 from app.db.db_settings import get_async_session
 from app.utils.user_jwt import create_access_token, get_user_from_token
 from app.utils.user_pass import authenticate_user, get_user
-from app.api.schemas.user import UserPersonalData
-from app.db.models import User
+from app.dao.user_dao import get_user_dao, SqlAlchemyUserDAO
 
 user_router = APIRouter(
     prefix="/user",
@@ -42,12 +41,14 @@ async def login_for_access_token(db_session: AsyncSession = Depends(get_async_se
 
 
 @user_router.get("/profile", response_model=UserPersonalData)
-async def personal_data(db_session: AsyncSession = Depends(get_async_session),
+async def personal_data(user_dao: SqlAlchemyUserDAO = Depends(get_user_dao),
                         token: str = Depends(oauth2_scheme),
                         ):
     personal = get_user_from_token(token)
     username = personal.get("sub")
-    user = await get_user(username, db_session)
+
+    # user = await get_user(username, db_session)
+    user = await user_dao.get_user(username)
     user_personal_data = UserPersonalData(
         nickname=user.nickname,
         email=user.email,
@@ -57,5 +58,3 @@ async def personal_data(db_session: AsyncSession = Depends(get_async_session),
     )
 
     return user_personal_data
-
-

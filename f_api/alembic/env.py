@@ -8,8 +8,8 @@ from sqlalchemy import pool
 
 sys.path.append(os.path.join(sys.path[0], 'app'))
 
-from app.core.config import settings  # Добавили импорт нашего конфига
-from app.db.db_settings import Base  # Добавили импорт нашей мета-БД
+from app.core.config import settings
+from app.db.db_settings import Base
 from app.db.models import User
 
 from alembic import context
