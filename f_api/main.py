@@ -5,7 +5,6 @@ from app.api.endpoints.user import user_router
 
 
 app = FastAPI()
-
 app.include_router(user_router)
 
 if __name__ == "__main__":
