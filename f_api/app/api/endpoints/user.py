@@ -4,16 +4,16 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.db_settings import get_async_session
-from app.utils.user_pass import authenticate_user
 from app.utils.user_jwt import create_access_token, get_user_from_token
-
+from app.utils.user_pass import authenticate_user
 
 user_router = APIRouter(
     prefix="/user",
     tags=["User"]
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login/")
+
 
 @user_router.get("/")
 async def get_root():
@@ -26,11 +26,12 @@ async def create_user():
 
 
 @user_router.post("/login")
-async def login_for_access_token(db_session: AsyncSession = Depends(get_async_session), form_data: OAuth2PasswordRequestForm = Depends()):
+async def login_for_access_token(db_session: AsyncSession = Depends(get_async_session),
+                                 form_data: OAuth2PasswordRequestForm = Depends()):
     username = form_data.username
     password = form_data.password
 
-    if not authenticate_user(db_session, username, password):
+    if not await authenticate_user(db_session, username, password):
         raise HTTPException(status_code=401, detail="Invalid credentials", headers={"WWW-Authenticate": "Bearer"})
 
     access_token = create_access_token(data={"sub": username})
