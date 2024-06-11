@@ -12,11 +12,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     SALT: str
 
-    # @property
     def async_database_url(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    # @property
     def jwt_settigs_dict(self):
         return {"secret_key": self.SECRET_KEY,
                 "algoritm": self.ALGORITHM,

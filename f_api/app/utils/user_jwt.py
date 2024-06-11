@@ -6,6 +6,7 @@ from app.core.config import Settings
 
 jwt_settings = Settings().jwt_settigs_dict()
 
+
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(minutes=jwt_settings["expire"])
@@ -24,5 +25,5 @@ def get_user_from_token(token: str):
         raise HTTPException(status_code=401, detail="Token has expired", headers={"WWW-Authenticate": "Bearer"})
     except jwt.DecodeError:
         raise HTTPException(status_code=401, detail="Invalid token", headers={"WWW-Authenticate": "Bearer"})
-    finally:
+    else:
         return payload

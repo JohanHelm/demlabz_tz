@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class UserCreate(BaseModel):
@@ -11,6 +11,8 @@ class UserCreate(BaseModel):
 
 
 class UserPersonalData(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     nickname: str
     email: str
     telegram_name: str
