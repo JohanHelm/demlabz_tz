@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas.user import UserPersonalData
-from app.db.db_settings import get_async_session
-from app.utils.user_jwt import create_access_token, get_user_from_token
-from app.utils.user_pass import authenticate_user, get_user
+from app.api.schemas.user import UserPersonalData, UserCreate
 from app.dao.user_dao import get_user_dao, SqlAlchemyUserDAO
+from app.db.models import User
+from app.utils.user_jwt import create_access_token, get_user_from_token
+from app.utils.user_pass import authenticate_user
 
 user_router = APIRouter(
     prefix="/user",
@@ -22,18 +21,20 @@ async def get_root():
     return FileResponse("app/static/user_main.html")
 
 
-@user_router.post("/")
-async def create_user():
+@user_router.post("/new")
+async def create_user(user_dao: SqlAlchemyUserDAO = Depends(get_user_dao),
+                      form_data: OAuth2PasswordRequestForm = Depends()):
     pass
 
 
 @user_router.post("/login")
-async def login_for_access_token(db_session: AsyncSession = Depends(get_async_session),
+async def login_for_access_token(user_dao: SqlAlchemyUserDAO = Depends(get_user_dao),
                                  form_data: OAuth2PasswordRequestForm = Depends()):
     username = form_data.username
     password = form_data.password
+    user: User = await user_dao.get_user(username)
 
-    if not await authenticate_user(db_session, username, password):
+    if not authenticate_user(user, password):
         raise HTTPException(status_code=401, detail="Invalid credentials", headers={"WWW-Authenticate": "Bearer"})
 
     access_token = create_access_token(data={"sub": username})
@@ -47,7 +48,6 @@ async def personal_data(user_dao: SqlAlchemyUserDAO = Depends(get_user_dao),
     personal = get_user_from_token(token)
     username = personal.get("sub")
 
-    # user = await get_user(username, db_session)
     user = await user_dao.get_user(username)
     user_personal_data = UserPersonalData(
         nickname=user.nickname,

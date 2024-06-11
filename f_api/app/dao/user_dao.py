@@ -3,7 +3,6 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas.user import UserCreate
 from app.db.models import User
 from app.db.db_settings import get_async_session
 
