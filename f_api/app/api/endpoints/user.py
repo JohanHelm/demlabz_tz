@@ -1,15 +1,15 @@
+import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas.user import UserPersonalData
+from app.api.schemas.user import UserPersonalData, UserCreate, UserUpdate
 from app.dao.user_dao import UserDAO
+from app.db.db_settings import get_async_session
 from app.db.models import User
 from app.utils.user_jwt import create_access_token, get_user_from_token
-from app.utils.user_pass import authenticate_user
-from app.db.db_settings import get_async_session
-
+from app.utils.user_pass import authenticate_user, get_password_hash
 
 user_router = APIRouter(
     prefix="/user",
@@ -29,9 +29,14 @@ async def get_root():
 
 
 @user_router.post("/new")
-async def create_user(user_dao: UserDAO = Depends(get_user_dao),
-                      form_data: OAuth2PasswordRequestForm = Depends()):
-    pass
+async def create_user(user_data: UserCreate,
+                      user_dao: UserDAO = Depends(get_user_dao)):
+
+    await user_dao.add_one({"nickname": user_data.nickname,
+                            "pass_hash": get_password_hash(user_data.open_pass),
+                            "email": user_data.email,
+                            "telegram_name": user_data.telegram_name})
+    return user_data
 
 
 @user_router.post("/login")
@@ -50,13 +55,33 @@ async def login_for_access_token(user_dao: UserDAO = Depends(get_user_dao),
 
 @user_router.get("/profile", response_model=UserPersonalData)
 async def personal_data(user_dao: UserDAO = Depends(get_user_dao),
-                        token: str = Depends(oauth2_scheme),
+                        token: str = Depends(oauth2_scheme)
                         ):
     personal = get_user_from_token(token)
     username = personal.get("sub")
 
     user = await user_dao.get_one(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     user_personal_data = UserPersonalData.model_validate(user)
-
-
     return user_personal_data
+
+
+@user_router.put("/edit", response_model=UserUpdate)
+async def update_user_data(edit_user_data: UserUpdate,
+                           user_dao: UserDAO = Depends(get_user_dao),
+                           token: str = Depends(oauth2_scheme)
+                           ):
+    personal = get_user_from_token(token)
+    username = personal.get("sub")
+    user = await user_dao.get_one(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    update_data = edit_user_data.dict(exclude_unset=True)
+    update_data["updated_at"] = datetime.datetime.now()
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+    await user_dao.update_one(user)
+    return edit_user_data

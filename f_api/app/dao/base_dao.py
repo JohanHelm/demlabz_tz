@@ -22,9 +22,14 @@ class DAO(AbstractDAO):
 
     async def add_one(self, data: dict):
         query = insert(self.model).values(**data).returning(self.model)
-        result = await self.session.execute(query)
-        return result.scalar_one()
+        await self.session.execute(query)
+        await self.session.commit()
 
     async def get_one(self, username: str):
-        result = await self.session.execute(select(self.model).where(self.model.nickname == username))
+        query = select(self.model).where(self.model.nickname == username)
+        result = await self.session.execute(query)
         return result.scalars().first()
+
+    async def update_one(self, new_data: dict):
+        await self.session.commit()
+        await self.session.refresh(new_data)
