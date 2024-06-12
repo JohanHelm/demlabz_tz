@@ -16,53 +16,25 @@ services:
     restart: always
     expose:
       - "5432"
+    #ports:
+    #  - "5432:5432"
+    networks:
+      - docker-virtual-network
+  fast_api:
+    build:
+      context: f_api/
+      dockerfile: Dockerfile
+    container_name: my-fast_api-container
+    restart: always
+    env_file: 
+      - f_api/.env
+    networks:
+      - docker-virtual-network
     ports:
-      - "5432:5432"
-    # networks:
-    #   - docker-virtual-network
-  # django:
-  #   build:
-  #     context: app/
-  #     dockerfile: Dockerfile
-  #   container_name: my-django-container
-  #   restart: always
-  #   env_file: 
-  #     - app/config/.env
-  #   networks:
-  #     - docker-virtual-network
-  #   expose: 
-  #     - "8000"
-  #   depends_on:
-  #     postgres_db:
-  #       condition: service_healthy  
-  #   command: >
-  #       sh -c "python manage.py migrate &&
-  #            python manage.py shell < create_superuser.py &&
-  #            python manage.py collectstatic --noinput --clear &&
-  #            uwsgi --strict --ini uwsgi.ini"
-  #   volumes:
-  #     - static_volume:/opt/app/staticfiles
-  #     - media_volume:/opt/app/mediafiles
-  # nginx:
-  #   build:
-  #     context: nginx/
-  #     dockerfile: Dockerfile
-  #   container_name: my_nginx_container
-  #   restart: always
-  #   networks:
-  #     - docker-virtual-network
-  #   depends_on:
-  #     - django
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./nginx/configs:/etc/nginx/conf.d:ro
-  #     - static_volume:/staticfiles
-  #     - media_volume:/mediafiles
-    
-# networks:
-#   docker-virtual-network:
-# volumes:
-#   static_volume:
-#   media_volume:
+     - "8066:8066"
+    depends_on:
+      postgres_db:
+        condition: service_healthy 
+  
+networks:
+  docker-virtual-network:
