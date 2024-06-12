@@ -2,21 +2,23 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: str
-    DB_USER: str
-    DB_PASS: str
-    DB_NAME: str
+    POSTGRES_DB: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: str
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     SALT: str
-    POSTGRES_DB: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
 
     def async_database_url(self):
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql+asyncpg://" \
+               f"{self.POSTGRES_USER}:" \
+               f"{self.POSTGRES_PASSWORD}@" \
+               f"{self.POSTGRES_HOST}:" \
+               f"{self.POSTGRES_PORT}/" \
+               f"{self.POSTGRES_DB}"
 
     def jwt_settigs_dict(self):
         return {"secret_key": self.SECRET_KEY,

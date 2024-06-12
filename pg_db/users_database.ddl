@@ -1,10 +1,10 @@
-CREATE USER users_admin WITH PASSWORD 'users_pass';
+-- CREATE USER users_admin WITH PASSWORD 'users_pass';
 
-CREATE DATABASE marketplace OWNER users_admin;
+-- CREATE DATABASE marketplace OWNER users_admin;
 
-\c marketplace
+-- \c marketplace
 
-CREATE TABLE IF NOT EXISTS auth_data (
+CREATE TABLE IF NOT EXISTS user_data (
     id bigserial PRIMARY KEY,
     nickname TEXT NOT NULL UNIQUE,
     pass_hash TEXT NOT NULL,

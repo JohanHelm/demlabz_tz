@@ -5,6 +5,10 @@ services:
       context: pg_db/
       dockerfile: Dockerfile
     container_name: shop-pg-db-container
+    environment:
+      POSTGRES_PASSWORD: users_pass
+      POSTGRES_USER: users_admin
+      POSTGRES_DB: marketplace
     env_file: 
       - f_api/.env
     healthcheck:

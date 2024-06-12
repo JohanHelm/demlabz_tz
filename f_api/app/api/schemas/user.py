@@ -10,8 +10,8 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     nickname: str
     open_pass: str
-    email: Optional[str] = None
-    telegram_name: Optional[str] = None
+    email: str = ""
+    telegram_name: str = ""
 
 
 class UserPersonalData(UserBase):
